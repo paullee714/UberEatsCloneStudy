@@ -7,8 +7,13 @@ export class Restaurant{
     // Query의 Schema와 같은 것 
     @Field(type => String)
     name: string;
-    
-    @Field(type => Boolean, {nullable:true})
-    isGood?: boolean
 
+    @Field(type => Boolean)
+    isVegan: boolean
+
+    @Field(type => String)
+    address:string
+
+    @Field(type => String)
+    ownerName: string
 }
