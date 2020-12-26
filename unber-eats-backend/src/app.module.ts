@@ -9,6 +9,7 @@ import { Restaurant } from './restaurants/entities/restaurant.entity';
 import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { User } from './users/entities/user.entity';
+import { JwtModule } from './jwt/jwt.module';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { User } from './users/entities/user.entity';
         DB_USERNAME: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
         DB_DATABASE: Joi.string().required(),
-        SECRET_KEY: Joi.string().required(),
+        PRIVATE_KEY: Joi.string().required(),
       })
     }),
     TypeOrmModule.forRoot({
@@ -40,6 +41,9 @@ import { User } from './users/entities/user.entity';
     GraphQLModule.forRoot({
       // autoSchemaFile: join(process.cwd(), 'src/schema.gql'), // 파일을 직접 가지고 있어야 함 
       autoSchemaFile: true, // 파일을 직접 가지고 있지 않아도 됨 -> 온메모리
+    }),
+    JwtModule.forRoot({
+      privateKey:process.env.PRIVATE_KEY
     }),
     UsersModule,
     CommonModule,
