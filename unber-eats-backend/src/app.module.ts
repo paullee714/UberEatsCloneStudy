@@ -10,7 +10,9 @@ import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { User } from './users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
-import { jwtMiddleware } from './jwt/jwt.middleware';
+import { JwtMiddleWare } from './jwt/jwt.middleware';
+// import { jwtMiddleware } from './jwt/jwt.middleware';
+// import { JwtMiddleWare } from './jwt/jwt.middleware';
 
 @Module({
   imports: [
@@ -42,6 +44,7 @@ import { jwtMiddleware } from './jwt/jwt.middleware';
     GraphQLModule.forRoot({
       // autoSchemaFile: join(process.cwd(), 'src/schema.gql'), // 파일을 직접 가지고 있어야 함 
       autoSchemaFile: true, // 파일을 직접 가지고 있지 않아도 됨 -> 온메모리
+      context:({req}) => ({user: req['user']})
     }),
     JwtModule.forRoot({
       privateKey:process.env.PRIVATE_KEY
@@ -55,10 +58,10 @@ import { jwtMiddleware } from './jwt/jwt.middleware';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer){
     // jwtMiddleware를 클래스로 작성 했을 경우 
-    // consumer.apply(JwtMiddleWare).forRoutes({
-    //   path:"*",
-    //   method: RequestMethod.ALL,
-    // })
+    consumer.apply(JwtMiddleWare).forRoutes({
+      path:"/graphql",
+      method: RequestMethod.POST,
+    })
     // jwtMiddleware에서 경로를 '제외'하고 싶을때
     // consumer.apply(JwtMiddleWare).exclude({
     //   path:'/api',
@@ -66,10 +69,10 @@ export class AppModule implements NestModule {
     // })
 
     // jwtMiddleware를 함수로 작성 했을 때
-    consumer.apply(jwtMiddleware).forRoutes({
-      path:'/graphql',
-      method:RequestMethod.ALL,
-    })
+    // consumer.apply(jwtMiddleware).forRoutes({
+    //   path:'/graphql',
+    //   method:RequestMethod.ALL,
+    // })
   }
 
 }

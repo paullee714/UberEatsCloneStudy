@@ -8,6 +8,7 @@ import { UsersResolver } from './users.resolver';
 
 @Module({
     imports:[TypeOrmModule.forFeature([User])],
-    providers:[UsersResolver,UsersSerivce]
+    providers:[UsersResolver,UsersSerivce],
+    exports: [UsersSerivce],
 })
 export class UsersModule {}
