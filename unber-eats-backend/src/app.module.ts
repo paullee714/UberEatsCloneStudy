@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import * as Joi from 'joi';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { User } from './users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
+import { jwtMiddleware } from './jwt/jwt.middleware';
 
 @Module({
   imports: [
@@ -51,4 +52,24 @@ import { JwtModule } from './jwt/jwt.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer){
+    // jwtMiddleware를 클래스로 작성 했을 경우 
+    // consumer.apply(JwtMiddleWare).forRoutes({
+    //   path:"*",
+    //   method: RequestMethod.ALL,
+    // })
+    // jwtMiddleware에서 경로를 '제외'하고 싶을때
+    // consumer.apply(JwtMiddleWare).exclude({
+    //   path:'/api',
+    //   method:RequestMethod.ALL
+    // })
+
+    // jwtMiddleware를 함수로 작성 했을 때
+    consumer.apply(jwtMiddleware).forRoutes({
+      path:'/graphql',
+      method:RequestMethod.ALL,
+    })
+  }
+
+}
