@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import * as Joi from 'joi';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -9,6 +9,11 @@ import { Restaurant } from './restaurants/entities/restaurant.entity';
 import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { User } from './users/entities/user.entity';
+import { JwtModule } from './jwt/jwt.module';
+import { JwtMiddleWare } from './jwt/jwt.middleware';
+// import { jwtMiddleware } from './jwt/jwt.middleware';
+// import { JwtMiddleWare } from './jwt/jwt.middleware';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -23,6 +28,7 @@ import { User } from './users/entities/user.entity';
         DB_USERNAME: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
         DB_DATABASE: Joi.string().required(),
+        PRIVATE_KEY: Joi.string().required(),
       })
     }),
     TypeOrmModule.forRoot({
@@ -39,11 +45,34 @@ import { User } from './users/entities/user.entity';
     GraphQLModule.forRoot({
       // autoSchemaFile: join(process.cwd(), 'src/schema.gql'), // 파일을 직접 가지고 있어야 함 
       autoSchemaFile: true, // 파일을 직접 가지고 있지 않아도 됨 -> 온메모리
+      context:({req}) => ({user: req['user']})
+    }),
+    JwtModule.forRoot({
+      privateKey:process.env.PRIVATE_KEY
     }),
     UsersModule,
-    CommonModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer){
+    // jwtMiddleware를 클래스로 작성 했을 경우 
+    consumer.apply(JwtMiddleWare).forRoutes({
+      path:"/graphql",
+      method: RequestMethod.POST,
+    })
+    // jwtMiddleware에서 경로를 '제외'하고 싶을때
+    // consumer.apply(JwtMiddleWare).exclude({
+    //   path:'/api',
+    //   method:RequestMethod.ALL
+    // })
+
+    // jwtMiddleware를 함수로 작성 했을 때
+    // consumer.apply(jwtMiddleware).forRoutes({
+    //   path:'/graphql',
+    //   method:RequestMethod.ALL,
+    // })
+  }
+
+}
