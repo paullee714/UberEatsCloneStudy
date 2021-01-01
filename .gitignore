@@ -119,3 +119,8 @@ dist
 .vscode/*
 .idea
 DS_Store
+
+.env
+.env*
+.env.*
+unber-eats-backend/.env.dev
