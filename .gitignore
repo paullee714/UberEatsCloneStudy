@@ -119,3 +119,7 @@ dist
 .vscode/*
 .idea
 DS_Store
+
+.env
+.env*
+.env.*
