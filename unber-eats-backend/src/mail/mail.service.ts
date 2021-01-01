@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CONFIG_OPTIONS } from 'src/common/common.constants';
-import { MailModuleOptions } from './mail.interfaces';
+import { EmailVar, MailModuleOptions } from './mail.interfaces';
 import got from "got"
 import * as FormData from "form-data"
 import { from } from 'form-data';
@@ -12,26 +12,35 @@ export class MailService {
         // this.sendEmail("testing","test")
     }
 
-    private async sendEmail(subject:string, template:string){
+    private async sendEmail(subject:string,to:string, template:string, emailVars:EmailVar[]){
         const form = new FormData();
-        form.append("from",`Excited User<mailgun@${this.options.domain}>`)
-        form.append("to",`paul_lee@kakao.com`)
+        form.append("from",`Paul from uber Eats Clone <mailgun@${this.options.domain}>`)
+        form.append("to",to)
         form.append("subject",subject)
         form.append("template",template)
-        form.append("v:code","hello~")
-        form.append("v:username","paul")
+        emailVars.forEach(eVar => form.append(`v:${eVar.key}`, eVar.value))
         
-        const response = got(`https://api.mailgun.net/v3/${this.options.domain}/messages`,{
-            method:'POST',    
-            headers: {
-                "Authorization": `Basic ${Buffer.from(
-                    `api:${this.options.apikey}`,
-                    ).toString('base64')}`,
-            },
-            body:form,
-        })
-
-        console.log((await response).body)
+        try{
+            const response = got(`https://api.mailgun.net/v3/${this.options.domain}/messages`,{
+                method:'POST',    
+                headers: {
+                    "Authorization": `Basic ${Buffer.from(
+                        `api:${this.options.apikey}`,
+                        ).toString('base64')}`,
+                },
+                body:form,
+            })
+        }catch(e){
+            console.log(e)
+        }
     }
     
+
+    sendVerificatioNEmail(email:string,  code:string) {
+        this.sendEmail("Verify Your Email",email ,"account",[
+            {"key":"code","value":code},
+            {"key":"username","value":email}
+        ])
+    }
+
 }

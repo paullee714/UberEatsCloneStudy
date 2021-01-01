@@ -11,14 +11,17 @@ import { EditProfileInput, EditProfileOuput } from "./dtos/edit-profile.dto";
 import { Verification } from "./entities/verification.entity";
 import { VerifyEmailOutput } from "./dtos/verify-email.dto";
 import { UserProfileOutput } from "./dtos/user-profile.dto";
+import { MailService } from "src/mail/mail.service";
 
 
 @Injectable()
 export class UsersSerivce{
     constructor(
         @InjectRepository(User) private readonly users: Repository<User>,
-        @InjectRepository(Verification) private readonly verifications: Repository<Verification>, //verification
+        @InjectRepository(Verification) 
+        private readonly verifications: Repository<Verification>, //verification
         private readonly jwtService: JwtService,
+        private readonly mailService: MailService,
     ){}
 
     async createAccount({email,password,role}:CreateAccountInput): Promise<{ok:boolean,error?:string}>{
@@ -32,9 +35,11 @@ export class UsersSerivce{
             }
             const user = await this.users.save(this.users.create({email,password,role}))
             //start verification
-            await this.verifications.save(this.verifications.create({
+            const verification =await this.verifications.save(this.verifications.create({
                 user
-            }))
+            }));
+
+            this.mailService.sendVerificatioNEmail(user.email,verification.code)
 
             return {ok:true}
         }catch(e){
@@ -95,11 +100,14 @@ export class UsersSerivce{
             if(email){
                 user.email = email
                 user.verified = false;
-                await this.verifications.save(this.verifications.create({user}))
+                const verification = await this.verifications.save(this.verifications.create({user}))
+                //verification mail send
+                this.mailService.sendVerificatioNEmail(user.email,verification.code)
             }
             if(password){
                 user.password = password
             }
+                    
             await this.users.save(user);
             return{
                 ok:true
