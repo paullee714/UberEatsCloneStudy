@@ -117,7 +117,8 @@ export class UsersSerivce{
             const verification = await this.verifications.findOne({code},{relations:['user']})
             if(verification){
                 verification.user.verified = true
-                this.users.save(verification.user)
+                await this.users.save(verification.user)
+                await this.verifications.delete(verification.id) // delete thie verification code
                 return {ok:true};
             }
             return {ok:false, error:'Verification not found.'}
