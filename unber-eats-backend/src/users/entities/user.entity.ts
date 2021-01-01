@@ -25,7 +25,8 @@ export class User extends CoreEntity{
     @IsEmail()
     email: string;
 
-    @Column()
+    @Column({select: false}) // update, verify등 모든 것에 password가 선택되지 않음
+    // @Column()
     @Field(type => String)
     password: string;
 

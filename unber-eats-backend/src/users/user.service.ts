@@ -46,7 +46,8 @@ export class UsersSerivce{
         // check the password
         // make jwt
         try{
-            const user = await this.users.findOne({email});
+            // select user's password -> entity에 select false라고 했기때문
+            const user = await this.users.findOne({email},{select:['id','password']});
             if(!user){
                 return{
                     ok:false,
@@ -91,12 +92,18 @@ export class UsersSerivce{
     }
 
     async verifyEmail(code:string):Promise<boolean>{
-        const verification = await this.verifications.findOne({code},{relations:['user']})
-        if(verification){
-            verification.user.verified = true
-            this.users.save(verification.user)
+        try{
+            const verification = await this.verifications.findOne({code},{relations:['user']})
+            if(verification){
+                verification.user.verified = true
+                this.users.save(verification.user)
+                return true;
+            }
+            return false
+        }catch(e){
+            console.log(e)
+            return false
         }
-        return false
     }
 
 }
