@@ -1,6 +1,27 @@
 import { Test } from "@nestjs/testing";
+import { getRepositoryToken } from "@nestjs/typeorm";
+import { JwtService } from "src/jwt/jwt.service";
+import { MailService } from "src/mail/mail.service";
+import { User } from "./entities/user.entity";
+import { Verification } from "./entities/verification.entity";
 import { UsersSerivce } from "./user.service";
 
+
+const mockRepository = {
+    findOne: jest.fn(),
+    save: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+}
+
+const mockJwtService = {
+    sign: jest.fn(),
+    verify: jest.fn(),
+}
+
+const mockMailService = {
+    sendVerificatioNEmail:jest.fn(),
+}
 
 describe("UserService",()=>{
 
@@ -9,14 +30,29 @@ describe("UserService",()=>{
     // create module
     beforeAll(async () => {
         const module = await Test.createTestingModule({
-            providers: [
-                UsersSerivce
+            providers: [UsersSerivce,
+                {
+                    provide: getRepositoryToken(User),
+                    useValue:mockRepository
+                },
+                {
+                    provide: getRepositoryToken(Verification),
+                    useValue:mockRepository
+                },
+                {
+                    provide: JwtService,
+                    useValue: mockJwtService
+                },
+                {
+                    provide: MailService,
+                    useValue: mockMailService
+                }
             ]
         }).compile();
         service = module.get<UsersSerivce>(UsersSerivce)
     });
 
-    it('be defined',() => {
+    it('should be defined',() => {
         expect(service).toBeDefined();
     })
 
