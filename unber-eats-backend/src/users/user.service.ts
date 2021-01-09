@@ -29,6 +29,7 @@ export class UsersSerivce{
         // if doesNotExist => Create user & hash the password => return ok
         try{
             const exists = await this.users.findOne({email})
+            console.log(exists)
             if(exists){
                 // User Exist -> return error 
                 return {ok:false,error:"There is a user with that email already"};

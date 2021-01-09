@@ -65,7 +65,17 @@ describe("UserService",()=>{
 
     // it.todo("createAccount");
     describe('createAccount', () => {
-        it("should fail if user exists",() => {});
+        it("should fail if user exists",() => {
+            usersRepository.findOne.mockResolvedValue({
+                id:1,
+                email:'lalalal',
+            });
+            service.createAccount({
+                email: '',
+                password:'',
+                role:0,
+            })
+        });
     })
     
 
